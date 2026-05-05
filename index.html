@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1D9E75" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pace" />
+  <title>Pace Converter</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #1D9E75;
+      --accent-bg: #E1F5EE;
+      --bg: #F5F5F3;
+      --card: #FFFFFF;
+      --text: #1A1A18;
+      --muted: #6B6B68;
+      --faint: #AEADA8;
+      --border: rgba(0,0,0,0.10);
+      --active-border: #1D9E75;
+      --input-bg: #F0EFEB;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111110;
+        --card: #1E1E1C;
+        --text: #F0EFE9;
+        --muted: #9A9994;
+        --faint: #5A5A57;
+        --border: rgba(255,255,255,0.10);
+        --input-bg: #2A2A28;
+        --accent-bg: #0A3326;
+      }
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      min-height: 100dvh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    header p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px 16px;
+      transition: border-color 0.15s ease;
+    }
+
+    .card.active {
+      border-color: var(--active-border);
+      background: var(--card);
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: none;
+    }
+
+    .card.active .dot { display: inline-block; }
+
+    .pace-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .fields {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+
+    input[type=number] {
+      width: 72px;
+      font-size: 40px;
+      font-weight: 600;
+      text-align: center;
+      background: var(--input-bg);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 8px 4px;
+      outline: none;
+      -moz-appearance: textfield;
+      transition: box-shadow 0.15s;
+      /* suppress browser number spinners */
+    }
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type=number]:focus { box-shadow: 0 0 0 2.5px var(--accent); }
+
+    .colon {
+      font-size: 38px;
+      font-weight: 600;
+      color: var(--faint);
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .unit {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .sublabels {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .sublabels span {
+      width: 72px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--faint);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 0;
+      color: var(--faint);
+    }
+
+    .divider svg { width: 22px; height: 22px; }
+
+    .clear-btn {
+      display: block;
+      margin: 28px auto 0;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 7px 22px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .clear-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+    footer {
+      margin-top: 36px;
+      font-size: 11px;
+      color: var(--faint);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Pace Converter</h1>
+    <p>Type in either field</p>
+  </header>
+
+  <div class="card" id="card-mi">
+    <div class="card-label"><span class="dot"></span>Minutes per Mile</div>
+    <div class="pace-row">
+      <div class="fields">
+        <input id="mi-min" type="number" min="0" max="99" placeholder="9" inputmode="numeric" />
+        <span class="colon">:</span>
+        <input id="mi-sec" type="number" min="0" max="59" placeholder="00" inputmode="numeric" />
+      </div>
+      <span class="unit">/ mi</span>
+    </div>
+    <div class="sublabels"><span>min</span><span>sec</span></div>
+  </div>
+
+  <div class="divider">
+    <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 4v14M5 12l6 6 6-6"/>
+    </svg>
+  </div>
+
+  <div class="card" id="card-km">
+    <div class="card-label"><span class="dot"></span>Minutes per Kilometer</div>
+    <div class="pace-row">
+      <div class="fields">
+        <input id="km-min" type="number" min="0" max="99" placeholder="5" inputmode="numeric" />
+        <span class="colon">:</span>
+        <input id="km-sec" type="number" min="0" max="59" placeholder="00" inputmode="numeric" />
+      </div>
+      <span class="unit">/ km</span>
+    </div>
+    <div class="sublabels"><span>min</span><span>sec</span></div>
+  </div>
+
+  <button class="clear-btn" onclick="clearAll()">Clear</button>
+
+  <footer>Works offline &nbsp;·&nbsp; Add to home screen</footer>
+
+  <script>
+    const KM_PER_MILE = 1.60934;
+    let busy = false;
+
+    const $ = id => document.getElementById(id);
+
+    function toSecs(minEl, secEl) {
+      const m = parseInt(minEl.value);
+      const s = parseInt(secEl.value);
+      const mins = isNaN(m) ? 0 : m;
+      const secs = isNaN(s) ? 0 : s;
+      if (secs < 0 || secs > 59) return null;
+      if (mins === 0 && secs === 0) return null;
+      return mins * 60 + secs;
+    }
+
+    function fill(minEl, secEl, totalSecs) {
+      if (!totalSecs || totalSecs <= 0) {
+        minEl.value = '';
+        secEl.value = '';
+        return;
+      }
+      const m = Math.floor(totalSecs / 60);
+      const s = Math.round(totalSecs % 60);
+      minEl.value = m;
+      secEl.value = s < 10 ? '0' + s : s;
+    }
+
+    function setActive(which) {
+      $('card-mi').classList.toggle('active', which === 'mi');
+      $('card-km').classList.toggle('active', which === 'km');
+    }
+
+    function fromMile() {
+      if (busy) return;
+      busy = true;
+      setActive('mi');
+      const secs = toSecs($('mi-min'), $('mi-sec'));
+      fill($('km-min'), $('km-sec'), secs ? secs / KM_PER_MILE : null);
+      busy = false;
+    }
+
+    function fromKm() {
+      if (busy) return;
+      busy = true;
+      setActive('km');
+      const secs = toSecs($('km-min'), $('km-sec'));
+      fill($('mi-min'), $('mi-sec'), secs ? secs * KM_PER_MILE : null);
+      busy = false;
+    }
+
+    function clearAll() {
+      busy = true;
+      ['mi-min','mi-sec','km-min','km-sec'].forEach(id => $(id).value = '');
+      $('card-mi').classList.remove('active');
+      $('card-km').classList.remove('active');
+      busy = false;
+    }
+
+    $('mi-min').addEventListener('input', fromMile);
+    $('mi-sec').addEventListener('input', fromMile);
+    $('km-min').addEventListener('input', fromKm);
+    $('km-sec').addEventListener('input', fromKm);
+
+    // Register service worker for offline use
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
